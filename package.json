@@ -1,0 +1,28 @@
+{
+  "name": "tblswvs-osc",
+  "version": "0.1.0",
+  "description": "OSC communication library for the tblswvs ecosystem",
+  "keywords": [
+    "tblswvs",
+    "osc"
+  ],
+  "license": "MIT",
+  "author": "Tables & Waves",
+  "type": "module",
+  "files": [ "build" ],
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "import": "./dist/index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "rm -rf build/* && tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "typescript": "~6.0.3"
+  },
+  "dependencies": {
+    "osc-min": "^2.1.2"
+  }
+}
