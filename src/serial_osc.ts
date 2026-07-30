@@ -1,7 +1,7 @@
 import { Arc } from "./arc.js";
 import { DeviceOptions } from "./device.js";
 import { Grid } from "./grid.js";
-import { OscEmitter } from "./osc_emitter.js";
+import { OscSender } from "./osc_sender.js";
 import { OscReceiver } from "./osc_receiver.js";
 
 
@@ -14,7 +14,7 @@ export class SerialOsc {
   #serialoscHost = "localhost";
   #serialoscPort = 12002;
 
-  #emitter: OscEmitter;
+  #sender: OscSender;
   #receiver: OscReceiver;
 
   #arc: Arc;
@@ -23,9 +23,9 @@ export class SerialOsc {
 
   constructor() {
     // Setup communication to serialosc and notify it of a new listener.
-    this.#emitter = new OscEmitter();
-    this.#emitter.add(this.#serialoscHost, this.#serialoscPort);
-    this.#emitter.send("/serialosc/notify", this.#host, this.#port);
+    this.#sender = new OscSender();
+    this.#sender.add(this.#serialoscHost, this.#serialoscPort);
+    this.#sender.send("/serialosc/notify", this.#host, this.#port);
 
     // Load the arc and grid devices. Note that they are fully started when notified by serialosc.
     this.#arc  = new Arc();
@@ -37,7 +37,7 @@ export class SerialOsc {
 
     // Request a list of devices from serialosc, which will be handled by the receiver's .on()
     // handler for /serialosc/device
-    this.#emitter.send("/serialosc/list", this.#host, this.#port);
+    this.#sender.send("/serialosc/list", this.#host, this.#port);
   }
 
 

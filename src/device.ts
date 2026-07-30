@@ -1,6 +1,6 @@
 import { EventEmitter } from "node:events";
 import { OscReceiver } from "./osc_receiver.js";
-import { OscEmitter } from "./osc_emitter.js";
+import { OscSender } from "./osc_sender.js";
 
 
 export interface DeviceOptions {
@@ -27,7 +27,7 @@ export class MonomeDevice extends EventEmitter {
   #devicePort: number|undefined;
 
   #oscReceiver: OscReceiver;
-  #oscEmitter: OscEmitter;
+  #oscSender: OscSender;
 
   #infoRequested: boolean;
   #connected: boolean;
@@ -39,7 +39,7 @@ export class MonomeDevice extends EventEmitter {
     this.#receiverPort = oscReceiverPort;
 
     this.#oscReceiver = new OscReceiver();
-    this.#oscEmitter  = new OscEmitter();
+    this.#oscSender  = new OscSender();
 
     this.#oscReceiver.bind(this.#receiverHost, this.#receiverPort);
 
@@ -58,8 +58,8 @@ export class MonomeDevice extends EventEmitter {
 
     // serialosc has reported the port being used for this device, so now the emitter can be configured (via add()).
     // Then send a /sys/port message to begin device initialization.
-    this.#oscEmitter.add(this.#deviceHost, this.#devicePort);
-    this.#oscEmitter.send("/sys/port", { type: "integer", value: this.#receiverPort });
+    this.#oscSender.add(this.#deviceHost, this.#devicePort);
+    this.#oscSender.send("/sys/port", { type: "integer", value: this.#receiverPort });
   }
 
 
@@ -144,13 +144,13 @@ export class MonomeDevice extends EventEmitter {
 
     // Port was sent to the device first in start(), so next send the host.
     if (this.#devicePort !== undefined && this.#deviceHost === undefined) {
-      this.#oscEmitter.send("/sys/host", { type: "string", value: this.#receiverHost });
+      this.#oscSender.send("/sys/host", { type: "string", value: this.#receiverHost });
     }
 
     // Once the host and port are set, request all device info, but only once.
     if (!this.#infoRequested && this.#devicePort !== undefined && this.#deviceHost !== undefined) {
       this.#infoRequested = true;
-      this.#oscEmitter.send("/sys/info");
+      this.#oscSender.send("/sys/info");
     }
   }
 }

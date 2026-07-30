@@ -9,7 +9,7 @@ interface OscListener {
 }
 
 
-export class OscEmitter extends EventEmitter {
+export class OscSender extends EventEmitter {
   #listeners: OscListener[];
   #socket: Socket;
 
