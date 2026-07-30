@@ -59,12 +59,12 @@ export class MonomeDevice extends EventEmitter {
 
 
   start(deviceOpts: DeviceOptions) {
-    this.deviceMessages();
-
     this.#id         = deviceOpts.id;
     this.#model      = deviceOpts.model;
     this.#devicePort = deviceOpts.port;
     this.#type       = deviceOpts.type;
+
+    this.deviceMessages();
 
     // serialosc has reported the port being used for this device, so now the emitter can be configured (via add()).
     // Then send a /sys/port message to begin device initialization.
@@ -77,6 +77,9 @@ export class MonomeDevice extends EventEmitter {
     return `${this.#type} ${this.#id} ${this.#model} ${this.#prefix} ${this.#connected} ` +
       `${this.#rows} ${this.#columns} ${this.#angle}`;
   }
+
+
+  localDeviceMessages() {}
 
 
   deviceMessages() {
@@ -102,24 +105,7 @@ export class MonomeDevice extends EventEmitter {
 
     this.#oscReceiver.on("/sys/prefix", (prefix: string) => {
       this.#prefix = prefix;
-
-      if (this.#type === "arc") {
-        this.#oscReceiver.removeAllListeners(this.#prefix + "/enc/key");
-        this.#oscReceiver.removeAllListeners(this.#prefix + "/enc/delta");
-
-        this.#oscReceiver.on(`${this.#prefix}/enc/key`, (n: number, s: number) => {
-          this.emit("key", { n: n, s: s });
-        });
-        this.#oscReceiver.on(`${this.#prefix}/enc/delta`, (n: number, d: number) => {
-          this.emit("delta", { n: n, d: d });
-        });
-      } else {
-        this.#oscReceiver.removeAllListeners(this.#prefix + "/grid/key");
-        this.#oscReceiver.on(this.#prefix + "/grid/key", (x: number, y: number, s: number) => {
-          this.emit("key", { x: x, y: y, s: s });
-        });
-      }
-
+      this.localDeviceMessages();
       this.#receiveMessage("/sys/prefix");
     });
 

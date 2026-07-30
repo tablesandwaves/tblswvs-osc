@@ -59,7 +59,6 @@ export class SerialOsc {
 
   #listenForSerialOscDevices() {
     this.#receiver.on("/serialosc/device", (id, model, port) => {
-      // console.log("HERE", id, model, port);
 
       const deviceOpts: DeviceOptions = { id: id, model: model, port: port, type: undefined };
 

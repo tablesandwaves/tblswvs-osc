@@ -11,8 +11,8 @@ export class Grid extends MonomeDevice {
   }
 
 
-  deviceMessages() {
-    super.deviceMessages();
+  localDeviceMessages() {
+    super.oscReceiver.removeAllListeners(super.prefix + "/grid/key");
 
     super.oscReceiver.on(super.prefix + "/grid/key", (x: number, y: number, s: number) => {
       this.emit("key", {x: x, y: y, s: s});

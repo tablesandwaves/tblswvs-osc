@@ -11,7 +11,7 @@ export class OscReceiver extends EventEmitter {
     super();
 
     this.#socket = dgram.createSocket("udp4");
-    this.#socket.on("message", message => this.#receive(message));
+    this.#socket.on("message", data => this.#receive(data));
   }
 
 
@@ -20,18 +20,17 @@ export class OscReceiver extends EventEmitter {
   }
 
 
-  #receive(message: any) {
+  #receive(data: any) {
     try {
-      const msg = osc.fromBuffer(message);
+      const messages: osc.OscMessageOutput[] = [];
 
-      const elements = msg.oscType === "bundle" ? msg.elements : [msg];
+      const decodedMsg = osc.fromBuffer(data);
+      if (decodedMsg.oscType === "bundle")
+        messages.push(...decodedMsg.elements as osc.OscMessageOutput[]);
+      else if (decodedMsg.oscType === "message")
+        messages.push(decodedMsg);
 
-      elements.forEach((element: any) => {
-        const args: any = [];
-        element.args.forEach((arg: any) => args.push(arg.value));
-        console.log(element.address, ...args);
-        this.emit(element.address, ...args);
-      });
+      messages.forEach(message => this.emit(message.address, ...message.args.map((arg: any) => arg.value)));
     } catch (e) {
       this.emit("error", e);
       return;
