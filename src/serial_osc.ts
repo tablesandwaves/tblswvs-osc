@@ -47,6 +47,16 @@ export class SerialOsc {
   }
 
 
+  get arc() {
+    return this.#arc;
+  }
+
+
+  get grid() {
+    return this.#grid;
+  }
+
+
   #listenForSerialOscDevices() {
     this.#receiver.on("/serialosc/device", (id, model, port) => {
       // console.log("HERE", id, model, port);

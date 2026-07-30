@@ -48,8 +48,18 @@ export class MonomeDevice extends EventEmitter {
   }
 
 
+  get oscReceiver() {
+    return this.#oscReceiver;
+  }
+
+
+  get prefix() {
+    return this.#prefix;
+  }
+
+
   start(deviceOpts: DeviceOptions) {
-    this.#deviceMessages();
+    this.deviceMessages();
 
     this.#id         = deviceOpts.id;
     this.#model      = deviceOpts.model;
@@ -69,7 +79,7 @@ export class MonomeDevice extends EventEmitter {
   }
 
 
-  #deviceMessages() {
+  deviceMessages() {
     this.#oscReceiver.on("/sys/port", (port: number) => {
       this.#devicePort = port;
       this.#receiveMessage("/sys/port");
