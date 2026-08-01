@@ -39,9 +39,19 @@ The core API for the arc object includes:
 * `setDialValues()`: set the current encoder values (e.g., act as a bank-able parameter control device)
 * `clearDisplay()`: reset all encoder values to 0
 
-## Example Usage
+## Installation & Example Usage
+
+If you create a new Node/NPM project, simply install via:
+
+```bash
+$ npm install tblswvs-osc
+```
+
+Given the following script as `index.js`:
 
 ```javascript
+import { SerialOsc } from "tblswvs-osc";
+
 const serialosc = new SerialOsc();
 serialosc.connect();
 
@@ -56,6 +66,29 @@ serialosc.arc.on("key", (buttonPress) => {
 serialosc.arc.on("parameter", (param) => {
   console.log("arc parameter", param.index, "value", param.value);
 });
+```
+
+You can run the script and begin pressing buttons and turning dials:
+
+```bash
+$ node index.js
+grid m12345678 monome 128 /monome true 8 16 0
+arc m09876543 monome arc /monome true 0 0 0
+grid button x 0 y 0 s 1
+grid button x 0 y 0 s 0
+grid button x 8 y 5 s 1
+grid button x 8 y 5 s 0
+grid button x 8 y 2 s 1
+grid button x 8 y 2 s 0
+arc button 1
+arc button 0
+arc parameter 0 value 0.0013020833333333333
+arc parameter 0 value 0.0026041666666666665
+arc parameter 0 value 0.00390625
+arc parameter 0 value 0.005208333333333333
+arc parameter 0 value 0.006510416666666667
+arc parameter 0 value 0.0078125
+arc parameter 0 value 0.009114583333333334
 ```
 
 ## Gratitude, Inspiration, Motivation
