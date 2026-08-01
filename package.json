@@ -1,6 +1,6 @@
 {
   "name": "tblswvs-osc",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "OSC communication library for the tblswvs ecosystem",
   "keywords": [
     "tblswvs",
@@ -11,8 +11,8 @@
   "type": "module",
   "files": [ "build" ],
   "exports": {
-    "types": "./dist/index.d.ts",
-    "import": "./dist/index.js"
+    "types": "./build/index.d.ts",
+    "import": "./build/index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
