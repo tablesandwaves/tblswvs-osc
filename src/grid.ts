@@ -30,6 +30,11 @@ export class Grid extends MonomeDevice {
 
 
   levelRow(xOffset: number, y: number, row: number[]) {
+    super.oscSender.send(super.prefix + "/grid/led/level/row",
+      { type: "integer", value: xOffset },
+      { type: "integer", value: y },
+      ...row.map(n => { return { type: "integer", value: n }; })
+    );
   }
 
 
