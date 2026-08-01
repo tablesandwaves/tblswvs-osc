@@ -38,7 +38,11 @@ export class Grid extends MonomeDevice {
   }
 
 
-  levelMatrix(matrix: number[][]) {
+  levelMatrix(matrix: number[][], yOffset: number = 0) {
+    for (let y = 0; y < matrix.length; y++) {
+      this.levelRow(0, y, matrix[y].slice(0, 8));
+      this.levelRow(8, y, matrix[y].slice(8, 16));
+    }
   }
 
 
