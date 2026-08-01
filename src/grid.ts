@@ -3,6 +3,13 @@ import { MonomeDevice } from "./device.js";
 
 const GRID_OSC_RECEIVER_PORT = 12005;
 
+export const GRID_ROW_COUNT      = 8;
+export const GRID_ROW_START      = 0;
+export const GRID_ROW_BISECT     = 8;
+export const GRID_ROW_BLANK_HALF = [0, 0, 0, 0,  0, 0, 0, 0];
+export const GRID_COLUMN_COUNT   = 16;
+export const GRID_COLUMN_START   = 0;
+
 
 export class Grid extends MonomeDevice {
 
@@ -39,17 +46,17 @@ export class Grid extends MonomeDevice {
 
 
   levelMatrix(matrix: number[][], yOffset: number = 0) {
-    for (let y = 0; y < matrix.length; y++) {
-      this.levelRow(0, y, matrix[y].slice(0, 8));
-      this.levelRow(8, y, matrix[y].slice(8, 16));
+    for (let gridY = yOffset, matrixY = 0; gridY < GRID_ROW_COUNT; gridY++, matrixY++) {
+      this.levelRow(GRID_ROW_START,  gridY, matrix[matrixY].slice(0, 8));
+      this.levelRow(GRID_ROW_BISECT, gridY, matrix[matrixY].slice(8, 16));
     }
   }
 
 
   clearGridDisplay(rowCount: number = 8) {
-    for (let i = 0; i < rowCount; i++) {
-      this.levelRow(0, i, [0, 0, 0, 0,  0, 0, 0, 0]);
-      this.levelRow(8, i, [0, 0, 0, 0,  0, 0, 0, 0]);
+    for (let gridY = GRID_COLUMN_START; gridY < rowCount; gridY++) {
+      this.levelRow(GRID_ROW_START,  gridY, GRID_ROW_BLANK_HALF);
+      this.levelRow(GRID_ROW_BISECT, gridY, GRID_ROW_BLANK_HALF);
     }
   }
 }
