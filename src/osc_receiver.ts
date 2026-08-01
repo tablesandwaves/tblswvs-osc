@@ -7,6 +7,9 @@ export class OscReceiver extends EventEmitter {
   #socket: Socket;
 
 
+  /**
+   * Create a new OSC receiver object.
+   */
   constructor() {
     super();
 
@@ -15,11 +18,20 @@ export class OscReceiver extends EventEmitter {
   }
 
 
+  /**
+   * Bind the receiver to the specified host and port.
+   *
+   * @param {string} host a hostname to use for listening for OSC messages
+   * @param {number} port a port for the specified hostname used for listening for OSC messages
+   */
   bind(host: string, port: number) {
     this.#socket.bind(port, host);
   }
 
 
+  /**
+   * Disconnect/close the socket used to send OSC messages.
+   */
   disconnect() {
     this.#socket.close();
   }

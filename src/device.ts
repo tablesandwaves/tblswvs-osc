@@ -11,6 +11,9 @@ export interface DeviceOptions {
 }
 
 
+/**
+ * A `MonomeDevice` represents either the connected grid or arc.
+ */
 export class MonomeDevice extends EventEmitter {
   #id: string|undefined;
   #model: string|undefined;
@@ -33,6 +36,11 @@ export class MonomeDevice extends EventEmitter {
   #connected: boolean;
 
 
+  /**
+   * Create a new monome device object, either a grid or an arc.
+   *
+   * @param {number} oscReceiverPort the port number this device should use to receive messages from serialoscd
+   */
   constructor(oscReceiverPort: number) {
     super();
 
@@ -42,38 +50,71 @@ export class MonomeDevice extends EventEmitter {
     this.#oscSender  = new OscSender();
 
     this.#oscReceiver.bind(this.#receiverHost, this.#receiverPort);
-    this.deviceMessages();
+    this.#deviceMessages();
 
     this.#infoRequested = false;
     this.#connected     = false;
   }
 
 
+  /**
+   * Get the device id.
+   *
+   * @return {string} the device's hardware ID
+   */
   get id() {
     return this.#id;
   }
 
 
+  /**
+   * Get the port of the monome device that messages are sent to.
+   *
+   * @return {number} the device's listening port.
+   */
   get devicePort() {
     return this.#devicePort;
   }
 
 
+  /**
+   * Get the OSC receiver object used to listen to incoming messages.
+   *
+   * @return {OscReceiver} the OSC receiver listening for messages from this object's connected device
+   */
   get oscReceiver() {
     return this.#oscReceiver;
   }
 
 
+  /**
+   * Get the OSC sender object used to send messages.
+   *
+   * @return {OscSender} the OSC sender that sends messages to this object's connected device
+   */
   get oscSender() {
     return this.#oscSender;
   }
 
 
+  /**
+   * Get the monome device prefix.
+   *
+   * @return {string} the message prefix used by the connected monome device when it sends messages
+   */
   get prefix() {
     return this.#prefix;
   }
 
 
+  /**
+   * Start this device.
+   *
+   * @param {DeviceOptions} deviceOpts the initial metadata used to startup the device
+   *
+   * Once notified with the `DeviceOptions` data, this device will then request the remaining information from the
+   * serialoscd service to finish loading the current device properties.
+   */
   start(deviceOpts: DeviceOptions) {
     this.#id         = deviceOpts.id;
     this.#model      = deviceOpts.model;
@@ -87,11 +128,17 @@ export class MonomeDevice extends EventEmitter {
   }
 
 
+  /**
+   * Stop this device and treat it as unconnected.
+   */
   stop() {
     this.#connected = false;
   }
 
 
+  /**
+   * Disconnect/close sockets for receiving and transmitting OSC messages for this device.
+   */
   disconnect() {
     this.#oscReceiver.disconnect();
     this.#oscSender.disconnect();
@@ -107,7 +154,7 @@ export class MonomeDevice extends EventEmitter {
   localDeviceMessages() {}
 
 
-  deviceMessages() {
+  #deviceMessages() {
     this.#oscReceiver.on("/sys/port", (port: number) => {
       this.#devicePort = port;
       this.#receiveMessage("/sys/port");

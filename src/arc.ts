@@ -13,10 +13,20 @@ export const ARC_ENCODER_MAX_VALUE      = ARC_ENCODER_STEP_COUNT * ARC_ENCODER_R
 const ARC_OSC_RECEIVER_PORT  = 12004;
 
 
+/**
+ * A monome arc device with a button and four parameter dials. This object will emit events that
+ * can be listened for that correspond to button presses and dial turns. A button press event will
+ * use the `key` message label and have the value of 0 or 1 for released and pressed, respectively.
+ * Parameter events will be emitted using the `parameter` label during dial rotation as an object
+ * with an `index` (0-3) for the corresponding dial and a `value` normalized to the 0-1 range.
+ */
 export class Arc extends MonomeDevice {
   #encoderValues: number[];
 
 
+  /**
+   * Create a new Arc device.
+   */
   constructor() {
     super(ARC_OSC_RECEIVER_PORT);
 
@@ -24,6 +34,12 @@ export class Arc extends MonomeDevice {
   }
 
 
+  /**
+   * Load/reload all listeners for arc hardware messages.
+   *
+   * This will reset the listeners for the arc's button presses (/enc/key) and dial turns
+   * (/enc/delta) messages.
+   */
   localDeviceMessages() {
     super.oscReceiver.removeAllListeners(super.prefix + "/enc/key");
     super.oscReceiver.removeAllListeners(super.prefix + "/enc/delta");
@@ -38,8 +54,33 @@ export class Arc extends MonomeDevice {
   }
 
 
+  /**
+   * Get this arc's current dial values.
+   *
+   * @return {number[]} an `Array` of the arc's dial values normalized to 0-1 range
+   */
   get encoderValues() {
     return this.#encoderValues.map(value => value / ARC_ENCODER_MAX_VALUE);
+  }
+
+
+  /**
+   * Set the arc's dial values to the current parameter list.
+   *
+   * @param {number[]} parameters the four values to set the arc's encoders to normalized to 0-1 range
+   */
+  setDialValues(parameters: number[]) {
+    parameters.forEach((parameter, dialIndex) => {
+      super.oscSender.send(super.prefix + "/ring/all",
+        { type: "integer", value: dialIndex },
+        { type: "integer", value: ARC_ENCODER_MIN_BRIGHTNESS }
+      );
+
+      setTimeout(() => {
+        this.#encoderValues[dialIndex] = parameter * ARC_ENCODER_MAX_VALUE;
+        this.#updateDeviceDials(dialIndex, 0, this.#encoderValues[dialIndex]);
+      }, 5);
+    });
   }
 
 
@@ -61,21 +102,6 @@ export class Arc extends MonomeDevice {
     // Tell listeners the new value normalized to 0-1 range, then update dial values.
     this.emit("parameter", { index: dialIndex, value: this.#encoderValues[dialIndex] / ARC_ENCODER_MAX_VALUE });
     this.#updateDeviceDials(dialIndex, previousValue, this.#encoderValues[dialIndex]);
-  }
-
-
-  setDialValues(parameters: number[]) {
-    parameters.forEach((parameter, dialIndex) => {
-      super.oscSender.send(super.prefix + "/ring/all",
-        { type: "integer", value: dialIndex },
-        { type: "integer", value: ARC_ENCODER_MIN_BRIGHTNESS }
-      );
-
-      setTimeout(() => {
-        this.#encoderValues[dialIndex] = parameter * ARC_ENCODER_MAX_VALUE;
-        this.#updateDeviceDials(dialIndex, 0, this.#encoderValues[dialIndex]);
-      }, 5);
-    });
   }
 
 

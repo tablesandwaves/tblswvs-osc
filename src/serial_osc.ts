@@ -5,6 +5,32 @@ import { OscSender } from "./osc_sender.js";
 import { OscReceiver } from "./osc_receiver.js";
 
 
+/**
+ * A `SerialOsc` object represents the serialoscd service running on the computer. It is the entry
+ * point for interacting with connected monome grid and arc devices. Create a single instance of
+ * this class and then use the `grid` and `arc` properties to send and receive hardware messages.
+ * Device messages are received by listening for grid `key` events or arc `key` or `parameter`
+ * events.
+ *
+ * Example:
+ *
+ * ```
+ * const serialosc = new SerialOsc();
+ * serialosc.connect();
+ *
+ * serialosc.grid.on("key", (keyPress) => {
+ *   console.log("x", keyPress.x, "y", keyPress.y, "s", keyPress.s);
+ * });
+ *
+ * serialosc.arc.on("key", (buttonPress) => {
+ *   console.log("arcButton", buttonPress);
+ * });
+ *
+ * serialosc.arc.on("parameter", (param) => {
+ *   console.log("parameter", param.index, "value", param.value);
+ * });
+ * ```
+ */
 export class SerialOsc {
   // Hostname and port this process listens on.
   #host = "localhost";
@@ -21,6 +47,12 @@ export class SerialOsc {
   #grid: Grid;
 
 
+  /**
+   * Instantiate a new SerialOsc instance.
+   *
+   * This object will be the entry point for interacting with the connected monome grid and arc
+   * devices. Access each by their respective getters on this class.
+   */
   constructor() {
     // Setup communication to serialosc and notify it of a new listener.
     this.#sender = new OscSender();
@@ -36,16 +68,32 @@ export class SerialOsc {
   }
 
 
+  /**
+   * Get the arc.
+   *
+   * @return {Arc} the monome arc connected to the computer
+   */
   get arc() {
     return this.#arc;
   }
 
 
+  /**
+   * Get the grid.
+   *
+   * @return {Grid} the monome grid connected to the computer
+   */
   get grid() {
     return this.#grid;
   }
 
 
+  /**
+   * Establish the connection to the serialoscd process running on the computer.
+   *
+   * This process will begin listening to device add/remove notifications and request connected
+   * devices that will fully configure the grid and arc objects.
+   */
   connect() {
     this.#receiver.bind(this.#host, this.#port);
     // Make the first request to begin monitoring connect/disconnect (add/remove) of devices
@@ -56,6 +104,9 @@ export class SerialOsc {
   }
 
 
+  /**
+   * Disconnect all connections to devices and shut down the SerialOsc sockets.
+   */
   disconnect() {
     this.#grid.disconnect();
     this.#arc.disconnect();
