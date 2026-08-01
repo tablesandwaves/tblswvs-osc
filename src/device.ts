@@ -48,6 +48,16 @@ export class MonomeDevice extends EventEmitter {
   }
 
 
+  get id() {
+    return this.#id;
+  }
+
+
+  get devicePort() {
+    return this.#devicePort;
+  }
+
+
   get oscReceiver() {
     return this.#oscReceiver;
   }

@@ -59,10 +59,10 @@ export class SerialOsc {
 
   #listenForSerialOscDevices() {
     this.#receiver.on("/serialosc/device", (id, model, port) => {
+      if ((this.#grid.id === id && this.#grid.devicePort === port) ||
+          (this.#arc.id  === id && this.#arc.devicePort  === port)) return;
 
       const deviceOpts: DeviceOptions = { id: id, model: model, port: port, type: undefined };
-
-      // Add the check here to see if the device has already been connected.
 
       if (model.match(/arc/)) {
         deviceOpts.type = "arc";
