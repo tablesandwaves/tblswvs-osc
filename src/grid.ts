@@ -86,7 +86,10 @@ export class Grid extends MonomeDevice {
   }
 
 
-  clearGridDisplay(rowCount: number = 8) {
+  /**
+   * Turn all grid button lights off.
+   */
+  clearDisplay(rowCount: number = 8) {
     for (let gridY = GRID_COLUMN_START; gridY < rowCount; gridY++) {
       this.levelRow(GRID_ROW_START,  gridY, GRID_ROW_BLANK_HALF);
       this.levelRow(GRID_ROW_BISECT, gridY, GRID_ROW_BLANK_HALF);
