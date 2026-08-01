@@ -25,7 +25,6 @@ export class SerialOsc {
     // Setup communication to serialosc and notify it of a new listener.
     this.#sender = new OscSender();
     this.#sender.add(this.#serialoscHost, this.#serialoscPort);
-    this.#sender.send("/serialosc/notify", this.#host, this.#port);
 
     // Load the arc and grid devices. Note that they are fully started when notified by serialosc.
     this.#arc  = new Arc();
@@ -33,16 +32,6 @@ export class SerialOsc {
 
     // Setup the listener to receive OSC messages coming from serialosc.
     this.#receiver = new OscReceiver();
-    this.#startOscReceiver();
-
-    // Request a list of devices from serialosc, which will be handled by the receiver's .on()
-    // handler for /serialosc/device
-    this.#sender.send("/serialosc/list", this.#host, this.#port);
-  }
-
-
-  #startOscReceiver() {
-    this.#receiver.bind(this.#host, this.#port);
     this.#listenForSerialOscDevices();
   }
 
@@ -54,6 +43,24 @@ export class SerialOsc {
 
   get grid() {
     return this.#grid;
+  }
+
+
+  connect() {
+    this.#receiver.bind(this.#host, this.#port);
+    // Make the first request to begin monitoring connect/disconnect (add/remove) of devices
+    this.#sender.send("/serialosc/notify", this.#host, this.#port);
+    // Request a list of devices from serialosc, which will be handled by the receiver's .on()
+    // handler for /serialosc/device
+    this.#sender.send("/serialosc/list", this.#host, this.#port);
+  }
+
+
+  disconnect() {
+    this.#grid.disconnect();
+    this.#arc.disconnect();
+    this.#sender.disconnect();
+    this.#receiver.disconnect();
   }
 
 
@@ -73,6 +80,24 @@ export class SerialOsc {
         this.#grid.start(deviceOpts);
         setTimeout(() => console.log(this.#grid.toString()), 10);
       }
+    });
+
+    this.#receiver.on("/serialosc/add", () => {
+      // First request all devices, which will handle connecting and configuring any devices not connected
+      this.#sender.send("/serialosc/list", this.#host, this.#port);
+      // Then send a request to continue listeing for any subsequent connect/disconnect (add/remove) messages
+      this.#sender.send("/serialosc/notify", this.#host, this.#port);
+    });
+
+    this.#receiver.on("/serialosc/remove", (id: string) => {
+      // First, stop the relevant device to set it up for the next reconnection
+      if (this.#grid.id === id)
+        this.#grid.stop();
+      else if (this.#arc.id === id)
+        this.#arc.stop();
+
+      // Then send a request to continue listeing for any subsequent connect/disconnect (add/remove) messages
+      this.#sender.send("/serialosc/notify", this.#host, this.#port);
     });
   }
 }

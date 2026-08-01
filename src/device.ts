@@ -42,6 +42,7 @@ export class MonomeDevice extends EventEmitter {
     this.#oscSender  = new OscSender();
 
     this.#oscReceiver.bind(this.#receiverHost, this.#receiverPort);
+    this.deviceMessages();
 
     this.#infoRequested = false;
     this.#connected     = false;
@@ -74,12 +75,21 @@ export class MonomeDevice extends EventEmitter {
     this.#devicePort = deviceOpts.port;
     this.#type       = deviceOpts.type;
 
-    this.deviceMessages();
-
     // serialosc has reported the port being used for this device, so now the emitter can be configured (via add()).
     // Then send a /sys/port message to begin device initialization.
     this.#oscSender.add(this.#deviceHost, this.#devicePort);
     this.#oscSender.send("/sys/port", { type: "integer", value: this.#receiverPort });
+  }
+
+
+  stop() {
+    this.#connected = false;
+  }
+
+
+  disconnect() {
+    this.#oscReceiver.disconnect();
+    this.#oscSender.disconnect();
   }
 
 

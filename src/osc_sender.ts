@@ -42,4 +42,9 @@ export class OscSender extends EventEmitter {
       return !(listener.host === host && listener.port === port);
     });
   }
+
+
+  disconnect() {
+    this.#socket.close();
+  }
 }

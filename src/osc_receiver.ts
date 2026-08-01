@@ -20,6 +20,11 @@ export class OscReceiver extends EventEmitter {
   }
 
 
+  disconnect() {
+    this.#socket.close();
+  }
+
+
   #receive(data: any) {
     try {
       const messages: osc.OscMessageOutput[] = [];
