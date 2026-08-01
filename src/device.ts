@@ -64,6 +64,11 @@ export class MonomeDevice extends EventEmitter {
   }
 
 
+  get oscSender() {
+    return this.#oscSender;
+  }
+
+
   get prefix() {
     return this.#prefix;
   }

@@ -21,6 +21,11 @@ export class Grid extends MonomeDevice {
 
 
   levelSet(x: number, y: number, s: number) {
+    super.oscSender.send(super.prefix + "/grid/led/level/set",
+      { type: "integer", value: x },
+      { type: "integer", value: y },
+      { type: "integer", value: s }
+    );
   }
 
 
