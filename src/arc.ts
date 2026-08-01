@@ -32,8 +32,8 @@ export class Arc extends MonomeDevice {
       this.emit("key", state);
     });
 
-    super.oscReceiver.on(super.prefix + "/enc/delta", (index: number, delta: number) => {
-      this.#delta(index, delta);
+    super.oscReceiver.on(super.prefix + "/enc/delta", (dialIndex: number, delta: number) => {
+      this.#delta(dialIndex, delta);
     });
   }
 
@@ -47,39 +47,41 @@ export class Arc extends MonomeDevice {
   }
 
 
-  #delta(index: number, delta: number) {
-    if ((this.#encoderValues[index] == ARC_ENCODER_MIN_VALUE && delta < 0) ||
-        (this.#encoderValues[index] == ARC_ENCODER_MAX_VALUE && delta > 0)) return;
+  #delta(dialIndex: number, delta: number) {
+    if ((this.#encoderValues[dialIndex] == ARC_ENCODER_MIN_VALUE && delta < 0) ||
+        (this.#encoderValues[dialIndex] == ARC_ENCODER_MAX_VALUE && delta > 0)) return;
 
-    const previousValue = this.#encoderValues[index];
-    this.#encoderValues[index] += delta;
-    this.#encoderValues[index] = this.#encoderValues[index] < ARC_ENCODER_MIN_VALUE ?
-        ARC_ENCODER_MIN_VALUE : this.#encoderValues[index];
-    this.#encoderValues[index] = this.#encoderValues[index] > ARC_ENCODER_MAX_VALUE ?
-        ARC_ENCODER_MAX_VALUE : this.#encoderValues[index];
+    const previousValue = this.#encoderValues[dialIndex];
+    this.#encoderValues[dialIndex] += delta;
+    this.#encoderValues[dialIndex] = this.#encoderValues[dialIndex] < ARC_ENCODER_MIN_VALUE ?
+        ARC_ENCODER_MIN_VALUE : this.#encoderValues[dialIndex];
+    this.#encoderValues[dialIndex] = this.#encoderValues[dialIndex] > ARC_ENCODER_MAX_VALUE ?
+        ARC_ENCODER_MAX_VALUE : this.#encoderValues[dialIndex];
 
     // Tell listeners the new value normalized to 0-1 range, then update dial values.
-    this.emit("parameter", { index: index, value: this.#encoderValues[index] / ARC_ENCODER_MAX_VALUE });
-    this.#updateDeviceDials(index, previousValue, this.#encoderValues[index]);
+    this.emit("parameter", { index: dialIndex, value: this.#encoderValues[dialIndex] / ARC_ENCODER_MAX_VALUE });
+    this.#updateDeviceDials(dialIndex, previousValue, this.#encoderValues[dialIndex]);
   }
 
 
   setDialValues(parameters: number[]) {
-    // parameters.forEach((parameter, i) => {
-    //   this.#encoderValues[i] = parameter;
-    //   this.#device.all(i, 0);
-    //   setTimeout(() => {
-    //     this.#encoderValues[i] = parameter * ARC_ENCODER_MAX_VALUE;
-    //     this.#updateDeviceDials(i, 0, this.#encoderValues[i]);
-    //   }, 20);
-    // });
+    parameters.forEach((parameter, dialIndex) => {
+      super.oscSender.send(super.prefix + "/ring/all",
+        { type: "integer", value: dialIndex },
+        { type: "integer", value: ARC_ENCODER_MIN_BRIGHTNESS }
+      );
+
+      setTimeout(() => {
+        this.#encoderValues[dialIndex] = parameter * ARC_ENCODER_MAX_VALUE;
+        this.#updateDeviceDials(dialIndex, 0, this.#encoderValues[dialIndex]);
+      }, 5);
+    });
   }
 
 
   #updateDeviceDials(dialIndex: number, previousValue: number, newValue: number) {
-    const previousLedValue   = previousValue / ARC_ENCODER_RESOLUTION;
-    const ledValue           = this.#encoderValues[dialIndex] / ARC_ENCODER_RESOLUTION;
-    const updatePartialValue = (ledValue % 1) * ARC_ENCODER_RESOLUTION;
+    const previousLedValue = previousValue / ARC_ENCODER_RESOLUTION;
+    const ledValue         = this.#encoderValues[dialIndex] / ARC_ENCODER_RESOLUTION;
 
     if (newValue > previousValue) {
       super.oscSender.send(super.prefix + "/ring/range",
