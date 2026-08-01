@@ -84,7 +84,11 @@ export class Arc extends MonomeDevice {
   }
 
 
+  /**
+   * Set all arc dial values to 0.
+   */
   clearDisplay() {
+    this.setDialValues([0, 0, 0, 0]);
   }
 
 
