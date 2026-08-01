@@ -42,6 +42,10 @@ export class Grid extends MonomeDevice {
   }
 
 
-  clearGridDisplay(rowCount: number) {
+  clearGridDisplay(rowCount: number = 8) {
+    for (let i = 0; i < rowCount; i++) {
+      this.levelRow(0, i, [0, 0, 0, 0,  0, 0, 0, 0]);
+      this.levelRow(8, i, [0, 0, 0, 0,  0, 0, 0, 0]);
+    }
   }
 }
