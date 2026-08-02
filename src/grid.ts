@@ -48,6 +48,10 @@ export class Grid extends MonomeDevice {
    * @param {number} s the state, or level, a number between 0 and 15
    */
   levelSet(x: number, y: number, s: number) {
+    if (x < 0 || x > 15) throw new Error("x-coordinate must be between 0 and 15");
+    if (y < 0 || y > 7)  throw new Error("y-coordinate must be between 0 and 7");
+    if (s < 0 || s > 15) throw new Error("level state must be between 0 and 15");
+
     super.oscSender.send(super.prefix + "/grid/led/level/set",
       { type: "integer", value: x },
       { type: "integer", value: y },
@@ -64,6 +68,12 @@ export class Grid extends MonomeDevice {
    * @param {number[]} row an `Array` of level values, numbers between 0 and 15
    */
   levelRow(xOffset: number, y: number, row: number[]) {
+    if (xOffset !== 0 && xOffset !== 8) throw new Error("x-offset must be 0 or 8");
+    if (y < 0 || y > 7) throw new Error("y-offset must be between 0 and 7")
+    if (row.length !== 8) throw new Error("row must have length 8");
+    if (!row.every(n => n >= 0 && n <= 15))
+      throw new Error("grid levels must be between 0 and 15");
+
     super.oscSender.send(super.prefix + "/grid/led/level/row",
       { type: "integer", value: xOffset },
       { type: "integer", value: y },
@@ -79,6 +89,10 @@ export class Grid extends MonomeDevice {
    * @param {number} yOffset the row index to start setting row values; optiona, default = 0
    */
   levelMatrix(matrix: number[][], yOffset: number = 0) {
+    if (matrix.length > 8) throw new Error("matrix may not have more than 8 rows");
+    if (!matrix.every(row => row.length === 16))
+      throw new Error("matrix rows must contain 16 elements");
+
     for (let gridY = yOffset, matrixY = 0;
       gridY < GRID_ROW_COUNT && matrixY < matrix.length;
       gridY++, matrixY++) {

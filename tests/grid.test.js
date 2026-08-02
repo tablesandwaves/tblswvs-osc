@@ -62,6 +62,24 @@ describe("Grid", () => {
     grid.levelSet(0, 0, 10);
   });
 
+  it("only allows level set messages for x-coordinates 0-15", () => {
+    assert.throws(() => {
+      grid.levelSet(-1, 0, 10);
+    }, /^Error: x-coordinate must be between 0 and 15/);
+  });
+
+  it("only allows level set messages for y-coordinates 0-7", () => {
+    assert.throws(() => {
+      grid.levelSet(0, 9, 10);
+    }, /^Error: y-coordinate must be between 0 and 7/);
+  });
+
+  it("only allows level set messages for levels 0-15", () => {
+    assert.throws(() => {
+      grid.levelSet(0, 0, 20);
+    }, /^Error: level state must be between 0 and 15/);
+  });
+
   it("can send messages to the grid for the first half of a row", (_, done) => {
     receiver.on("/monome/grid/led/level/row", (...args) => {
       try {
@@ -92,10 +110,38 @@ describe("Grid", () => {
     grid.levelRow(8, 1, [ 1, 0, 0, 0,  1, 0, 0, 0 ]);
   });
 
+  it("only allows level row messages with x-offsets that are 0 or 8", () => {
+    assert.throws(() => {
+      grid.levelRow(1, 1, [ 1, 0, 0, 0,  1, 0, 0, 0 ]);
+    }, /^Error: x-offset must be 0 or 8/);
+  });
+
+  it("only allows level row messages with y-offsets between 0 and 7", () => {
+    assert.throws(() => {
+      grid.levelRow(0, 8, [ 1, 0, 0, 0,  1, 0, 0, 0 ]);
+    }, /^Error: y-offset must be between 0 and 7/);
+  });
+
+  it("only allows level row messages with rows that have 8 elements", () => {
+    assert.throws(() => {
+      grid.levelRow(8, 1, [ 1, 0, 0, 0,  1, 0, 0, 0,  1 ]);
+    }, /^Error: row must have length 8/);
+  });
+
+  it("only allows level row messages with rows containing digits 0-15", () => {
+    assert.throws(() => {
+      grid.levelRow(0, 0, [ -1, 0, 0, 0,  1, 0, 0, 0 ]);
+    }, /^Error: grid levels must be between 0 and 15/);
+  });
+
   describe("sending complete rows as matrices", () => {
-    const matrix = new Array();
-    for (let i = 0; i < 8; i++)
-      matrix[i] = [ 1, 0, 0, 0,  1, 0, 0, 0,  1, 0, 0, 0,  1, 0, 0, 0 ];
+    let matrix;
+
+    beforeEach(() => {
+      matrix = new Array();
+      for (let i = 0; i < 8; i++)
+        matrix[i] = [ 1, 0, 0, 0,  1, 0, 0, 0,  1, 0, 0, 0,  1, 0, 0, 0 ];
+    })
 
     it("can send a matrix for one complete row", (_, done) => {
       const messages = { firstHalf: false, secondHalf: false };
@@ -214,6 +260,20 @@ describe("Grid", () => {
       });
 
       grid.levelMatrix(matrix.slice(0, 2), 1);
+    });
+
+    it("only allows level matrix messages for matrices with a max of 8 rows", () => {
+      matrix[8] = [ 1, 0, 0, 0,  1, 0, 0, 0,  1, 0, 0, 0,  1, 0, 0, 0 ];
+      assert.throws(() => {
+        grid.levelMatrix(matrix);
+      }, /^Error: matrix may not have more than 8 rows/);
+    });
+
+    it("only allows level matrix messages for matrices containing 16 element rows", () => {
+      matrix[0] = [ 1, 0, 0, 0,  1, 0, 0, 0,  1, 0, 0, 0,  1, 0, 0, 0,  1 ];
+      assert.throws(() => {
+        grid.levelMatrix(matrix);
+      }, /^Error: matrix rows must contain 16 elements/);
     });
   });
 });
