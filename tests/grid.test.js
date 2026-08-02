@@ -134,6 +134,7 @@ describe("Grid", () => {
     }, /^Error: grid levels must be between 0 and 15/);
   });
 
+
   describe("sending complete rows as matrices", () => {
     let matrix;
 
@@ -275,5 +276,36 @@ describe("Grid", () => {
         grid.levelMatrix(matrix);
       }, /^Error: matrix rows must contain 16 elements/);
     });
+  });
+
+
+  it("can clear all rows", (_, done) => {
+    const messages = new Array();
+
+    receiver.on("/monome/grid/led/level/row", (...args) => {
+      try {
+        assert.deepEqual(args.slice(2), [ 0, 0, 0, 0,  0, 0, 0, 0 ]);
+
+        // Add the 0/8 row half start indices to each message row
+        if (messages[args[1]] === undefined)
+          messages[args[1]] = new Array();
+        messages[args[1]].push(args[0]);
+
+        if (messages.filter(Array).length === 8) {
+          const allMessagesReceived = messages.filter(Array).every(rowStartIndices => {
+            return rowStartIndices.length === 2 &&
+              rowStartIndices.includes(0) &&
+              rowStartIndices.includes(8);
+          });
+
+          if (allMessagesReceived)
+            done();
+        }
+      } catch (error) {
+        done(error);
+      }
+    });
+
+    grid.clearDisplay();
   });
 });
