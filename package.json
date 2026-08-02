@@ -9,13 +9,15 @@
   "license": "MIT",
   "author": "Tables & Waves",
   "type": "module",
-  "files": [ "build" ],
+  "files": [
+    "build"
+  ],
   "exports": {
     "types": "./build/index.d.ts",
     "import": "./build/index.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --trace-warnings --test tests/**/*.test.js",
     "compile": "rm -rf build/* && tsc"
   },
   "devDependencies": {
