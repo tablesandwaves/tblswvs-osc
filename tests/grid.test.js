@@ -61,4 +61,159 @@ describe("Grid", () => {
 
     grid.levelSet(0, 0, 10);
   });
+
+  it("can send messages to the grid for the first half of a row", (_, done) => {
+    receiver.on("/monome/grid/led/level/row", (...args) => {
+      try {
+        assert.equal(args[0], 0);
+        assert.equal(args[1], 1);
+        assert.deepEqual(args.slice(2), [ 1, 0, 0, 0,  1, 0, 0, 0 ]);
+        done();
+      } catch (error) {
+        done(error);
+      }
+    });
+
+    grid.levelRow(0, 1, [ 1, 0, 0, 0,  1, 0, 0, 0 ]);
+  });
+
+  it("can send messages to the grid for the second half of a row", (_, done) => {
+    receiver.on("/monome/grid/led/level/row", (...args) => {
+      try {
+        assert.equal(args[0], 8);
+        assert.equal(args[1], 1);
+        assert.deepEqual(args.slice(2), [ 1, 0, 0, 0,  1, 0, 0, 0 ]);
+        done();
+      } catch (error) {
+        done(error);
+      }
+    });
+
+    grid.levelRow(8, 1, [ 1, 0, 0, 0,  1, 0, 0, 0 ]);
+  });
+
+  describe("sending complete rows as matrices", () => {
+    const matrix = new Array();
+    for (let i = 0; i < 8; i++)
+      matrix[i] = [ 1, 0, 0, 0,  1, 0, 0, 0,  1, 0, 0, 0,  1, 0, 0, 0 ];
+
+    it("can send a matrix for one complete row", (_, done) => {
+      const messages = { firstHalf: false, secondHalf: false };
+
+      receiver.on("/monome/grid/led/level/row", (...args) => {
+        try {
+          if (args[0] === 0)
+            messages.firstHalf = true;
+          else if (args[0] === 8)
+            messages.secondHalf = true;
+          assert.equal(args[1], 0);
+          assert.deepEqual(args.slice(2), [ 1, 0, 0, 0,  1, 0, 0, 0 ]);
+
+          if (messages.firstHalf && messages.secondHalf)
+            done();
+        } catch (error) {
+          done(error);
+        }
+      });
+
+      grid.levelMatrix(matrix.slice(0, 1));
+    });
+
+    it("can send a matrix for multiple complete rows", (_, done) => {
+      const messages = new Array();
+
+      receiver.on("/monome/grid/led/level/row", (...args) => {
+        try {
+          assert.deepEqual(args.slice(2), [ 1, 0, 0, 0,  1, 0, 0, 0 ]);
+
+          // Add the 0/8 row half start indices to each message row
+          if (messages[args[1]] === undefined)
+            messages[args[1]] = new Array();
+          messages[args[1]].push(args[0]);
+
+          if (messages.length === 2) {
+            const allMessagesReceived = messages.reduce((allReceived, rowStartIndices) => {
+              if (rowStartIndices.length === 2 &&
+                  rowStartIndices[0] === 0 &&
+                  rowStartIndices[1] === 8)
+                allReceived = true;
+                return allReceived;
+            }, false);
+
+            if (allMessagesReceived)
+              done();
+          }
+        } catch (error) {
+          done(error);
+        }
+      });
+
+      grid.levelMatrix(matrix.slice(0, 2));
+    });
+
+    it("can send a matrix for all complete rows", (_, done) => {
+      const messages = new Array();
+
+      receiver.on("/monome/grid/led/level/row", (...args) => {
+        try {
+          assert.deepEqual(args.slice(2), [ 1, 0, 0, 0,  1, 0, 0, 0 ]);
+
+          // Add the 0/8 row half start indices to each message row
+          if (messages[args[1]] === undefined)
+            messages[args[1]] = new Array();
+          messages[args[1]].push(args[0]);
+
+          if (messages.length === 8) {
+            const allMessagesReceived = messages.every(rowStartIndices => {
+              return rowStartIndices.length === 2 &&
+                rowStartIndices.includes(0) &&
+                rowStartIndices.includes(8);
+            });
+
+            if (allMessagesReceived)
+              done();
+          }
+        } catch (error) {
+          done(error);
+        }
+      });
+
+      grid.levelMatrix(matrix);
+    });
+
+    it("can send a matrix with an offset", (_, done) => {
+      const messages = new Array();
+
+      receiver.on("/monome/grid/led/level/row", (...args) => {
+        try {
+          assert.deepEqual(args.slice(2), [ 1, 0, 0, 0,  1, 0, 0, 0 ]);
+
+          // Add the 0/8 row half start indices to each message row
+          if (messages[args[1]] === undefined)
+            messages[args[1]] = new Array();
+          messages[args[1]].push(args[0]);
+
+          if (messages.filter(Array).length === 2) {
+            const allMessagesReceived = messages.filter(Array).every(rowStartIndices => {
+              return rowStartIndices.length === 2 &&
+                rowStartIndices.includes(0) &&
+                rowStartIndices.includes(8);
+            });
+
+            if (allMessagesReceived) {
+              // Finally verify the offset indices.
+              assert.equal(messages[0], undefined);
+              assert.notEqual(messages[1], undefined)
+              assert.notEqual(messages[2], undefined)
+              done();
+            }
+          }
+        } catch (error) {
+          done(error);
+        }
+      });
+
+      grid.levelMatrix(matrix.slice(0, 2), 1);
+    });
+  });
 });

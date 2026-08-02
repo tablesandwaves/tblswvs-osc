@@ -79,7 +79,9 @@ export class Grid extends MonomeDevice {
    * @param {number} yOffset the row index to start setting row values; optiona, default = 0
    */
   levelMatrix(matrix: number[][], yOffset: number = 0) {
-    for (let gridY = yOffset, matrixY = 0; gridY < GRID_ROW_COUNT; gridY++, matrixY++) {
+    for (let gridY = yOffset, matrixY = 0;
+      gridY < GRID_ROW_COUNT && matrixY < matrix.length;
+      gridY++, matrixY++) {
       this.levelRow(GRID_ROW_START,  gridY, matrix[matrixY].slice(0, 8));
       this.levelRow(GRID_ROW_BISECT, gridY, matrix[matrixY].slice(8, 16));
     }
