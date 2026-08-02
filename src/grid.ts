@@ -1,7 +1,7 @@
 import { MonomeDevice } from "./device.js";
 
 
-const GRID_OSC_RECEIVER_PORT = 12005;
+export const GRID_OSC_RECEIVER_PORT = 12005;
 
 export const GRID_ROW_COUNT      = 8;
 export const GRID_ROW_START      = 0;

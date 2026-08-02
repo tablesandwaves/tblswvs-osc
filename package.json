@@ -17,7 +17,7 @@
     "import": "./build/index.js"
   },
   "scripts": {
-    "test": "node --trace-warnings --test tests/**/*.test.js",
+    "test": "npm run compile && node --trace-warnings --test tests/**/*.test.js",
     "compile": "rm -rf build/* && tsc"
   },
   "devDependencies": {

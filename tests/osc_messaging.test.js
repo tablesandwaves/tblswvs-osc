@@ -1,7 +1,7 @@
+import assert from "node:assert";
 import { afterEach, beforeEach, describe, it } from "node:test";
 import { OscReceiver } from "../build/osc_receiver.js";
 import { OscSender } from "../build/osc_sender.js";
-import assert from "node:assert";
 
 
 describe("OSC messaging", () => {

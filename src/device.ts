@@ -18,7 +18,7 @@ export class MonomeDevice extends EventEmitter {
   #id: string|undefined;
   #model: string|undefined;
   #type: string|undefined;
-  #prefix: string|undefined;
+  #prefix: string;
   #rows: number|undefined;
   #columns: number|undefined;
   #angle: number|undefined;
@@ -44,6 +44,7 @@ export class MonomeDevice extends EventEmitter {
   constructor(oscReceiverPort: number) {
     super();
 
+    this.#prefix = "/monome"; // default prefix from serialosc
     this.#receiverPort = oscReceiverPort;
 
     this.#oscReceiver = new OscReceiver();
