@@ -10,7 +10,7 @@ export const ARC_ENCODER_STEP_COUNT     = 48;
 export const ARC_ENCODER_MIN_VALUE      = 0;
 export const ARC_ENCODER_MAX_VALUE      = ARC_ENCODER_STEP_COUNT * ARC_ENCODER_RESOLUTION;
 
-const ARC_OSC_RECEIVER_PORT  = 12004;
+export const ARC_OSC_RECEIVER_PORT  = 12004;
 
 
 /**
