@@ -110,4 +110,31 @@ describe("Arc", () => {
       arc.setDialValues([0.5, 0.5, 1, 1.1]);
     }, /^Error: encoder values must be between 0 and 1/);
   });
+
+  it("can clear all encoder/parameter values", (_, done) => {
+    const messages = { ringAllLedResets: 0, ringRangeSets: 0 };
+
+    const checkFinished = () => {
+      if (messages.ringAllLedResets === 4 && messages.ringRangeSets === 4) {
+        try {
+          assert.deepEqual(arc.encoderValues, [0, 0, 0, 0]);
+          done();
+        } catch (error) {
+          done(error);
+        }
+      }
+    }
+
+    receiver.on("/monome/ring/all", (...args) => {
+      messages.ringAllLedResets += 1;
+      checkFinished();
+    });
+
+    receiver.on("/monome/ring/range", (...args) => {
+      messages.ringRangeSets += 1;
+      checkFinished();
+    });
+
+    arc.clearDisplay();
+  });
 });
