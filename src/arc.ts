@@ -70,6 +70,10 @@ export class Arc extends MonomeDevice {
    * @param {number[]} parameters the four values to set the arc's encoders to normalized to 0-1 range
    */
   setDialValues(parameters: number[]) {
+    if (parameters.length !== 4) throw new Error("all four encoders must be updated at once");
+    if (!parameters.every(n => n >= 0 && n <= 1))
+      throw new Error("encoder values must be between 0 and 1");
+
     parameters.forEach((parameter, dialIndex) => {
       super.oscSender.send(super.prefix + "/ring/all",
         { type: "integer", value: dialIndex },

@@ -97,6 +97,17 @@ describe("Arc", () => {
     });
 
     arc.setDialValues([0.5, 0.5, 1, 1]);
+  });
 
+  it("only allows sending all four encoder values at once", () => {
+    assert.throws(() => {
+      arc.setDialValues([0.5, 0.5, 1]);
+    }, /^Error: all four encoders must be updated at once/);
+  });
+
+  it("only allows sending encoder values in the 0-1 range", () => {
+    assert.throws(() => {
+      arc.setDialValues([0.5, 0.5, 1, 1.1]);
+    }, /^Error: encoder values must be between 0 and 1/);
   });
 });
