@@ -1,6 +1,6 @@
 {
   "name": "tblswvs-osc",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "OSC communication library for the tblswvs ecosystem",
   "keywords": [
     "tblswvs",
